@@ -1,4 +1,4 @@
-acc_ring - test of GPU direct with OpenACC.
+acc_ring - a test of GPU direct with OpenACC.
            PGI compiler is required.
 
 $ make
