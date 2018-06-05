@@ -2,8 +2,7 @@ acc_ring - a test of GPU direct with OpenACC.
            CUDA, PGI compiler, and openmpi are required.
 
 $ make
-$ mpirun -x PSM2_GPUDIRECT=1 -x PSM2_CUDA=1 -x LD_LIBRARY_PATH -np 8 -npernode 4 ./a.out $((1024*1024)) 2>/dev/nu
-ll
+$ mpirun -x PSM2_GPUDIRECT=1 -x PSM2_CUDA=1 -x LD_LIBRARY_PATH -np 8 -npernode 4 ./a.out $((1024*1024)) 2>/dev/null
  iam:            0 mydev:            0
  size:      1048576
  iam:            4 mydev:            0
