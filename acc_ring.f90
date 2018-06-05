@@ -44,16 +44,16 @@ program main
   recvfrom = iam -1
   if (iam == 0) recvfrom = np - 1
 
-  !$acc enter data copyin(sendbuf(:), recvbuf(:))
+  !$acc enter data copyin(sendbuf(:)) create(recvbuf(:))
   call mpi_barrier(mpi_comm_world)
   call system_clock(clk(1), clk_rate, clk_max)
   if (iam == 0) then
-     !$acc host_data use_device(sendbuf(:))
+     !$acc host_data use_device(sendbuf(:), recvbuf(:))
      call mpi_send(sendbuf, size, mpi_real8, sendto,   0, mpi_comm_world)
      call mpi_recv(recvbuf, size, mpi_real8, recvfrom, 0, mpi_comm_world, stat)
      !$acc end host_data
   else
-     !$acc host_data use_device(recvbuf(:))
+     !$acc host_data use_device(sendbuf(:), recvbuf(:))
      call mpi_recv(recvbuf, size, mpi_real8, recvfrom, 0, mpi_comm_world, stat)
      call mpi_send(sendbuf, size, mpi_real8, sendto,   0, mpi_comm_world)
      !$acc end host_data
