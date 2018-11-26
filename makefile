@@ -1,5 +1,5 @@
 all:
-	mpif90 -acc acc_ring.f90
+	mpif90 -acc acc_ring.f90 -o acc_ring
 
 clean:
-	rm -f a.out *~
+	rm -f acc_ring *~

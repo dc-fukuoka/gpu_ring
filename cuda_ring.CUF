@@ -1,0 +1,79 @@
+#define cudacheck(err) \
+  if (err /= cudasuccess) then; \
+     write(6, *) "error:", cudageterrorstring(err); \
+     call mpi_finalize; \
+     stop; \
+  end if
+
+program main
+  use cudafor
+  use mpi_f08
+  implicit none
+  
+  integer :: iam, np, ierr
+  type(mpi_status) :: stat
+  integer :: i
+  integer :: mydev, ndevs
+  integer :: sendto, recvfrom
+  real(8),allocatable,dimension(:) :: sendbuf, recvbuf
+  real(8),device,allocatable,dimension(:) :: sendbuf_d, recvbuf_d
+  real(8) :: t0, time
+  character(len=32) :: argv1
+  integer :: size
+
+  call mpi_init
+  call mpi_comm_rank(mpi_comm_world, iam)
+  call mpi_comm_size(mpi_comm_world, np)
+
+  ierr = cudagetdevicecount(ndevs)
+  cudacheck(ierr)
+  mydev = mod(iam, ndevs)
+  ierr = cudasetdevice(mydev)
+  cudacheck(ierr)
+  write(6, *) "iam:", iam, "mydev:", mydev
+  
+  if (command_argument_count() == 0) then
+     size = 1024
+  else
+     call get_command_argument(1, argv1)
+     read(argv1, *) size
+  end if
+
+  if (iam == 0) write(6, *) "size:", size
+  
+  allocate(sendbuf(size), recvbuf(size))
+  allocate(sendbuf_d(size), recvbuf_d(size))
+
+  do i = 1, size
+     sendbuf(i) = 10.0d0*i+iam
+     recvbuf(i) = 0.0d0
+  end do
+
+  sendto = iam + 1
+  if (iam == np - 1) sendto = 0
+  recvfrom = iam -1
+  if (iam == 0) recvfrom = np - 1
+  
+  sendbuf_d = sendbuf
+  recvbuf_d = recvbuf
+
+  call mpi_barrier(mpi_comm_world)
+  t0 = mpi_wtime()
+  if (iam == 0) then
+     call mpi_send(sendbuf_d, size, mpi_real8, sendto,   0, mpi_comm_world)
+     call mpi_recv(recvbuf_d, size, mpi_real8, recvfrom, 0, mpi_comm_world, stat)
+  else
+     call mpi_recv(recvbuf_d, size, mpi_real8, recvfrom, 0, mpi_comm_world, stat)
+     call mpi_send(sendbuf_d, size, mpi_real8, sendto,   0, mpi_comm_world)
+  endif
+  call mpi_barrier(mpi_comm_world)
+  time = mpi_wtime() - t0
+  recvbuf = recvbuf_d
+  
+  if (iam == 0) write(6, *) "time[s]:", time
+  
+  deallocate(sendbuf, recvbuf)
+  deallocate(sendbuf_d, recvbuf_d)
+  call mpi_finalize
+  stop
+end program main
