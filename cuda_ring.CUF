@@ -1,6 +1,6 @@
 #define cudacheck(err) \
   if (err /= cudasuccess) then; \
-     write(6, *) "error:", cudageterrorstring(err); \
+     write(6, *) "error:", cudageterrorstring(err), " ", __FILE__, ":", __LINE__; \
      call mpi_finalize; \
      stop; \
   end if
@@ -29,6 +29,9 @@ program main
   cudacheck(ierr)
   mydev = mod(iam, ndevs)
   ierr = cudasetdevice(mydev)
+  call mpi_barrier(mpi_comm_world)
+!  ierr = cudathreadsynchronize()
+!  write(6, *) cudageterrorstring(cudagetlasterror()), ":", iam
   cudacheck(ierr)
   write(6, *) "iam:", iam, "mydev:", mydev
   
@@ -42,7 +45,9 @@ program main
   if (iam == 0) write(6, *) "size:", size
   
   allocate(sendbuf(size), recvbuf(size))
+  write(6,*) "before"
   allocate(sendbuf_d(size), recvbuf_d(size))
+  write(6,*) "after"
 
   do i = 1, size
      sendbuf(i) = 10.0d0*i+iam
