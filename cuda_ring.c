@@ -22,6 +22,20 @@ static double dclock(void)
 	
 }
 #endif
+
+#ifdef _OMPI_CUDA_OPA
+int MPI_Init(int *argc, char ***argv)
+{
+	int ndevs;
+	CUDACHECK(cudaGetDeviceCount(&ndevs));
+	int iam = atoi(getenv("OMPI_COMM_WORLD_RANK"));
+	int mydev = iam%ndevs;
+	CUDACHECK(cudaSetDevice(mydev));
+	
+	return PMPI_Init(argc, argv);
+}
+#endif
+
 int main(int argc, char **argv)
 {
         int iam, np;
