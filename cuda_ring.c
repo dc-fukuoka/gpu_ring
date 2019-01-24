@@ -51,10 +51,11 @@ int main(int argc, char **argv)
         MPI_Init(&argc, &argv);
         MPI_Comm_rank(MPI_COMM_WORLD, &iam);
         MPI_Comm_size(MPI_COMM_WORLD, &np);
-
+#ifndef _OMPI_CUDA_OPA
 	CUDACHECK(cudaGetDeviceCount(&ndevs));
 	mydev = iam % ndevs;
 	CUDACHECK(cudaSetDevice(mydev));
+#endif
 #ifdef _DEBUG
 	printf("iam: %d mydev: %d\n", iam, mydev);
 #endif
