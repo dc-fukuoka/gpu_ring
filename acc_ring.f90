@@ -21,7 +21,7 @@ program main
   ndevs = acc_get_num_devices(acc_device_nvidia)
   mydev = mod(iam, ndevs)
   call acc_set_device_num(mydev, acc_device_nvidia)
-  write(6, *) "iam:", iam, "mydev:", mydev
+!  write(6, *) "iam:", iam, "mydev:", mydev
   
   if (command_argument_count() == 0) then
      size = 1024

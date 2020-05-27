@@ -31,7 +31,7 @@ program main
   ierr = cudasetdevice(mydev)
   call mpi_barrier(mpi_comm_world)
   cudacheck(ierr)
-  write(6, *) "iam:", iam, "mydev:", mydev
+!  write(6, *) "iam:", iam, "mydev:", mydev
   
   if (command_argument_count() == 0) then
      size = 1024
